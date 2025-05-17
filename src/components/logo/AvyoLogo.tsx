@@ -16,36 +16,43 @@ const AvyoLogo: React.FC<AvyoLogoProps> = ({ size = 40, className = "" }) => {
         fill="none" 
         xmlns="http://www.w3.org/2000/svg"
       >
+        {/* Base circle */}
         <circle cx="60" cy="60" r="60" fill="#71B7CF" />
+        
+        {/* Letter A shape */}
         <path 
-          d="M36 84L60 36L84 84" 
+          d="M40 90L60 30L80 90" 
           stroke="#E3F2F7" 
-          strokeWidth="8" 
+          strokeWidth="12" 
           strokeLinecap="round" 
           strokeLinejoin="round" 
         />
+        
+        {/* Crossbar of the A */}
         <path 
-          d="M48 60H72" 
+          d="M45 65H75" 
           stroke="#E3F2F7" 
-          strokeWidth="8" 
+          strokeWidth="10" 
           strokeLinecap="round" 
         />
+        
+        {/* Decorative elements */}
         <circle 
           cx="60" 
-          cy="48" 
-          r="6" 
+          cy="30" 
+          r="8" 
           fill="#3D7D91" 
         />
         <circle 
           cx="40" 
-          cy="78" 
-          r="6" 
+          cy="90" 
+          r="8" 
           fill="#3D7D91" 
         />
         <circle 
           cx="80" 
-          cy="78" 
-          r="6" 
+          cy="90" 
+          r="8" 
           fill="#3D7D91" 
         />
       </svg>

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { Card } from "@/components/ui/card";
@@ -76,7 +75,7 @@ const AvatarDisplay = ({ username, message, isWaving = false }: AvatarDisplayPro
 
   return (
     <div className="flex flex-col items-center space-y-4">
-      <Card className="p-6 bg-gradient-to-br from-avyo-light to-avyo-background shadow-xl rounded-xl relative overflow-hidden">
+      <Card className="p-6 bg-gradient-to-br from-avyo-primary/20 to-avyo-highlight shadow-xl rounded-xl relative overflow-hidden border-avyo-accent/30">
         <div className="absolute top-4 right-4 flex space-x-2 text-avyo-dark/70">
           <div className="flex items-center gap-1">
             <Calendar size={16} />
@@ -89,13 +88,13 @@ const AvatarDisplay = ({ username, message, isWaving = false }: AvatarDisplayPro
         </div>
         
         {festival && (
-          <div className="absolute top-4 left-4 bg-avyo-accent/10 px-2 py-1 rounded-full">
+          <div className="absolute top-4 left-4 bg-avyo-accent/20 px-2 py-1 rounded-full">
             <span className="text-xs font-medium text-avyo-accent">{festival}</span>
           </div>
         )}
 
         <div className={`w-48 h-48 mx-auto ${isWaving ? "animate-avatar-wave" : "animate-float"}`}>
-          {/* Default avatar when no special avatar is available */}
+          {/* Avatar display */}
           {avatar ? (
             <img 
               src={avatar} 
@@ -104,7 +103,28 @@ const AvatarDisplay = ({ username, message, isWaving = false }: AvatarDisplayPro
             />
           ) : (
             <div className="w-full h-full rounded-full bg-gradient-to-br from-avyo-primary to-avyo-secondary flex items-center justify-center text-white text-6xl font-bold">
-              A
+              {/* Default avatar - stylized A matching our logo */}
+              <svg 
+                width="80" 
+                height="80" 
+                viewBox="0 0 120 120" 
+                fill="none" 
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path 
+                  d="M40 90L60 30L80 90" 
+                  stroke="#E3F2F7" 
+                  strokeWidth="10" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                />
+                <path 
+                  d="M45 65H75" 
+                  stroke="#E3F2F7" 
+                  strokeWidth="8" 
+                  strokeLinecap="round" 
+                />
+              </svg>
             </div>
           )}
         </div>
@@ -134,7 +154,7 @@ const AvatarDisplay = ({ username, message, isWaving = false }: AvatarDisplayPro
         </div>
       </Card>
       
-      <div className="w-full max-w-md bg-white rounded-lg shadow-md p-3">
+      <div className="w-full max-w-md bg-white rounded-lg shadow-md p-3 border border-avyo-primary/20">
         <div className="flex items-center space-x-2">
           <Cloud className="text-avyo-primary" size={18} />
           <h4 className="text-sm font-medium text-gray-700">Today's Highlights</h4>
