@@ -1,4 +1,3 @@
-
 import { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -7,7 +6,7 @@ import AvatarDisplay from "@/components/avatar/AvatarDisplay";
 import ChatInterface from "@/components/chat/ChatInterface";
 import { UserContext } from "@/context/UserContext";
 import { LogOut } from "lucide-react";
-import { useToast } from "@/components/ui/toast";
+import { useToast } from "@/components/ui/use-toast";
 
 const Dashboard = () => {
   const { username, setUsername } = useContext(UserContext);
