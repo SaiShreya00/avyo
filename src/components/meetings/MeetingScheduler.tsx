@@ -131,7 +131,7 @@ const MeetingScheduler: React.FC<MeetingSchedulerProps> = ({ username }) => {
                 mode="single"
                 selected={selectedDate}
                 onSelect={setSelectedDate}
-                className="rounded-md"
+                className="rounded-md pointer-events-auto"
               />
             </div>
           )}
