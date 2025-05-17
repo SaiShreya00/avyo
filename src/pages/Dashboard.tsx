@@ -1,3 +1,4 @@
+
 import { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -7,6 +8,7 @@ import ChatInterface from "@/components/chat/ChatInterface";
 import { UserContext } from "@/context/UserContext";
 import { LogOut } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import AvyoLogo from "@/components/logo/AvyoLogo";
 
 const Dashboard = () => {
   const { username, setUsername } = useContext(UserContext);
@@ -46,13 +48,13 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-avyo-primary/5 to-avyo-accent/5 p-4 md:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-avyo-primary/10 to-avyo-accent/5 p-4 md:p-8">
       <header className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-avyo-primary">Avyo</h1>
+        <AvyoLogo />
         <Button 
           variant="outline" 
           onClick={handleLogout}
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 border-avyo-primary text-avyo-primary hover:bg-avyo-primary/10"
         >
           <LogOut size={16} /> 
           <span className="hidden sm:inline">Logout</span>

@@ -26,10 +26,10 @@ export default {
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				avyo: {
-					primary: '#6366f1',    // Indigo for primary 
-					secondary: '#818cf8',  // Lighter indigo
-					accent: '#f43f5e',     // Rose for accent
-					highlight: '#fbbf24',  // Amber for highlights
+					primary: '#71B7CF',    // Iceberg blue primary
+					secondary: '#9AC9DB',  // Lighter iceberg blue
+					accent: '#3D7D91',     // Darker iceberg blue for accent
+					highlight: '#E3F2F7',  // Very light iceberg blue for highlights
 					background: '#f9fafb', // Light background
 					dark: '#1e293b',       // Slate dark
 					light: '#ffffff',      // White
