@@ -4,9 +4,14 @@ import React from 'react';
 interface AvyoLogoProps {
   size?: number;
   className?: string;
+  variant?: 'full' | 'icon';
 }
 
-const AvyoLogo: React.FC<AvyoLogoProps> = ({ size = 40, className = "" }) => {
+const AvyoLogo: React.FC<AvyoLogoProps> = ({ 
+  size = 40, 
+  className = "",
+  variant = 'full'
+}) => {
   return (
     <div className={`inline-flex items-center ${className}`}>
       <svg 
@@ -56,9 +61,11 @@ const AvyoLogo: React.FC<AvyoLogoProps> = ({ size = 40, className = "" }) => {
           fill="#3D7D91" 
         />
       </svg>
-      <span className="ml-2 text-2xl font-bold bg-gradient-to-r from-avyo-primary to-avyo-accent bg-clip-text text-transparent">
-        Avyo
-      </span>
+      {variant === 'full' && (
+        <span className="ml-2 text-2xl font-bold bg-gradient-to-r from-avyo-primary to-avyo-accent bg-clip-text text-transparent">
+          Avyo<span className="text-sm font-medium align-top ml-1">Pro</span>
+        </span>
+      )}
     </div>
   );
 };
