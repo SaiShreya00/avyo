@@ -41,24 +41,18 @@ const AvyoLogo: React.FC<AvyoLogoProps> = ({
           strokeLinecap="round" 
         />
         
-        {/* Decorative elements */}
-        <circle 
-          cx="60" 
-          cy="30" 
-          r="8" 
-          fill="#3D7D91" 
-        />
-        <circle 
-          cx="40" 
-          cy="90" 
-          r="8" 
-          fill="#3D7D91" 
-        />
-        <circle 
-          cx="80" 
-          cy="90" 
-          r="8" 
-          fill="#3D7D91" 
+        {/* Avatar face elements */}
+        {/* Eyes */}
+        <circle cx="45" cy="48" r="4" fill="#3D7D91" />
+        <circle cx="75" cy="48" r="4" fill="#3D7D91" />
+        
+        {/* Smile */}
+        <path 
+          d="M45 75Q60 90 75 75" 
+          stroke="#3D7D91" 
+          strokeWidth="3" 
+          strokeLinecap="round" 
+          fill="none"
         />
       </svg>
       {variant === 'full' && (
