@@ -1,5 +1,5 @@
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useContext } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -7,6 +7,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Send, User } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { generateAIResponse } from "@/utils/aiUtils";
+import { UserContext } from "@/context/UserContext";
+import SubscriptionModal from "@/components/subscription/SubscriptionModal";
 
 interface ChatInterfaceProps {
   username: string;
@@ -20,7 +22,10 @@ interface Message {
   timestamp: Date;
 }
 
+const FREE_MESSAGE_LIMIT = 20;
+
 const ChatInterface = ({ username, onMessageSent }: ChatInterfaceProps) => {
+  const { questionsAsked, incrementQuestionsAsked, isPremium, setIsPremium } = useContext(UserContext);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
@@ -31,6 +36,7 @@ const ChatInterface = ({ username, onMessageSent }: ChatInterfaceProps) => {
   ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const endOfMessagesRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -41,6 +47,12 @@ const ChatInterface = ({ username, onMessageSent }: ChatInterfaceProps) => {
 
   const handleSendMessage = async () => {
     if (!input.trim()) return;
+    
+    // Check if user has reached the free message limit and is not premium
+    if (questionsAsked >= FREE_MESSAGE_LIMIT && !isPremium) {
+      setShowSubscriptionModal(true);
+      return;
+    }
     
     // Add user message to chat
     const userMessage = {
@@ -69,6 +81,9 @@ const ChatInterface = ({ username, onMessageSent }: ChatInterfaceProps) => {
           timestamp: new Date(),
         },
       ]);
+      
+      // Increment the questions counter
+      incrementQuestionsAsked();
     } catch (error) {
       toast({
         title: "Error",
@@ -84,6 +99,29 @@ const ChatInterface = ({ username, onMessageSent }: ChatInterfaceProps) => {
     if (e.key === "Enter") {
       handleSendMessage();
     }
+  };
+
+  const handleSubscribe = () => {
+    setIsPremium(true);
+    toast({
+      title: "Welcome to Premium!",
+      description: "You now have unlimited access to Avyo AI.",
+    });
+  };
+
+  // Show message limit counter
+  const renderMessageCounter = () => {
+    if (isPremium) return null;
+    
+    return (
+      <div className="text-xs text-gray-500 flex justify-center mb-2">
+        {questionsAsked < FREE_MESSAGE_LIMIT ? (
+          <span>{FREE_MESSAGE_LIMIT - questionsAsked} free messages remaining</span>
+        ) : (
+          <span className="text-avyo-primary">Message limit reached</span>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -167,6 +205,8 @@ const ChatInterface = ({ username, onMessageSent }: ChatInterfaceProps) => {
         </div>
       </ScrollArea>
       
+      {renderMessageCounter()}
+      
       <div className="p-3 border-t flex space-x-2">
         <Input
           value={input}
@@ -174,15 +214,22 @@ const ChatInterface = ({ username, onMessageSent }: ChatInterfaceProps) => {
           onKeyDown={handleKeyDown}
           placeholder="Type your message..."
           className="flex-1"
+          disabled={questionsAsked >= FREE_MESSAGE_LIMIT && !isPremium}
         />
         <Button 
           onClick={handleSendMessage} 
-          disabled={!input.trim() || isTyping}
+          disabled={!input.trim() || isTyping || (questionsAsked >= FREE_MESSAGE_LIMIT && !isPremium)}
           className="bg-avyo-primary hover:bg-avyo-secondary"
         >
           <Send size={18} />
         </Button>
       </div>
+
+      <SubscriptionModal 
+        open={showSubscriptionModal} 
+        onOpenChange={setShowSubscriptionModal} 
+        onSubscribe={handleSubscribe}
+      />
     </div>
   );
 };
