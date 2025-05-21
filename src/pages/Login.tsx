@@ -1,4 +1,3 @@
-
 import LoginForm from "@/components/auth/LoginForm";
 import { useContext } from "react";
 import { UserContext } from "@/context/UserContext";
@@ -29,8 +28,11 @@ const Login = () => {
           <h1 className="text-4xl md:text-5xl font-bold mb-4 text-avyo-dark">
             Meet <span className="text-avyo-primary">Avyo</span>
           </h1>
-          <p className="text-xl text-gray-600 mb-6">
+          <p className="text-xl text-gray-600 mb-2">
             Your intelligent AI companion designed for personal assistance
+          </p>
+          <p className="text-lg text-avyo-accent italic mb-6">
+            A whisper of tomorrow
           </p>
           <div className="flex flex-col md:flex-row gap-2 justify-center md:justify-start">
             <button className="px-6 py-3 bg-avyo-primary text-white rounded-lg hover:bg-avyo-secondary transition-colors">
@@ -142,6 +144,9 @@ const Login = () => {
             <AvyoLogo size={40} className="mb-4" variant="full" />
             <p className="text-gray-300 mt-2">
               Your AI companion for a smarter life
+            </p>
+            <p className="text-gray-400 italic mt-1">
+              avyo - A whisper of tomorrow
             </p>
           </div>
           
