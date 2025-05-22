@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -26,13 +25,13 @@ export default {
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				avyo: {
-					primary: '#71B7CF',    // Iceberg blue primary
-					secondary: '#9AC9DB',  // Lighter iceberg blue
-					accent: '#3D7D91',     // Darker iceberg blue for accent
-					highlight: '#E3F2F7',  // Very light iceberg blue for highlights
-					background: '#f9fafb', // Light background
-					dark: '#1e293b',       // Slate dark
-					light: '#ffffff',      // White
+					primary: '#893F45',     // Cordovan primary
+					secondary: '#A65F65',   // Lighter cordovan
+					accent: '#6D3035',      // Darker cordovan for accent
+					highlight: '#F0E6E7',   // Very light cordovan for highlights
+					background: '#f9fafb',  // Light background
+					dark: '#1e293b',        // Slate dark
+					light: '#ffffff',       // White
 				},
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
