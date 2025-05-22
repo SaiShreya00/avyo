@@ -43,13 +43,13 @@ const AvyoLogo: React.FC<AvyoLogoProps> = ({
         
         {/* Avatar face elements */}
         {/* Eyes */}
-        <circle cx="45" cy="48" r="4" fill="#6D3035" />
-        <circle cx="75" cy="48" r="4" fill="#6D3035" />
+        <circle cx="45" cy="48" r="4" fill="#F0E6E7" />
+        <circle cx="75" cy="48" r="4" fill="#F0E6E7" />
         
         {/* Smile */}
         <path 
           d="M45 75Q60 90 75 75" 
-          stroke="#6D3035" 
+          stroke="#F0E6E7" 
           strokeWidth="3" 
           strokeLinecap="round" 
           fill="none"
