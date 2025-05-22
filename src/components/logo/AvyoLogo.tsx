@@ -22,12 +22,12 @@ const AvyoLogo: React.FC<AvyoLogoProps> = ({
         xmlns="http://www.w3.org/2000/svg"
       >
         {/* Base circle */}
-        <circle cx="60" cy="60" r="60" fill="#71B7CF" />
+        <circle cx="60" cy="60" r="60" fill="#893F45" />
         
         {/* Letter A shape */}
         <path 
           d="M40 90L60 30L80 90" 
-          stroke="#E3F2F7" 
+          stroke="#F0E6E7" 
           strokeWidth="12" 
           strokeLinecap="round" 
           strokeLinejoin="round" 
@@ -36,20 +36,20 @@ const AvyoLogo: React.FC<AvyoLogoProps> = ({
         {/* Crossbar of the A */}
         <path 
           d="M45 65H75" 
-          stroke="#E3F2F7" 
+          stroke="#F0E6E7" 
           strokeWidth="10" 
           strokeLinecap="round" 
         />
         
         {/* Avatar face elements */}
         {/* Eyes */}
-        <circle cx="45" cy="48" r="4" fill="#3D7D91" />
-        <circle cx="75" cy="48" r="4" fill="#3D7D91" />
+        <circle cx="45" cy="48" r="4" fill="#6D3035" />
+        <circle cx="75" cy="48" r="4" fill="#6D3035" />
         
         {/* Smile */}
         <path 
           d="M45 75Q60 90 75 75" 
-          stroke="#3D7D91" 
+          stroke="#6D3035" 
           strokeWidth="3" 
           strokeLinecap="round" 
           fill="none"
