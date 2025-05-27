@@ -1,0 +1,34 @@
+
+{
+  "glyphs": {},
+  "familyName": "helvetiker",
+  "ascender": 1,
+  "descender": 0,
+  "underlinePosition": 0,
+  "underlineThickness": 0,
+  "boundingBox": {
+    "yMin": 0,
+    "xMin": 0,
+    "yMax": 1,
+    "xMax": 1
+  },
+  "resolution": 1000,
+  "original_font_information": {
+    "format": 0,
+    "copyright": "Copyright (c) 2009 by Stephan Mueller. All rights reserved.",
+    "fontFamily": "Helvetiker",
+    "fontSubFamily": "Regular",
+    "uniqueID": "Helvetiker",
+    "fullName": "Helvetiker",
+    "version": "Version 1.000 2009 initial release",
+    "postScriptName": "Helvetiker",
+    "trademark": "",
+    "manufacturer": "Stephan Mueller",
+    "designer": "Stephan Mueller",
+    "description": "",
+    "manufacturerURL": "",
+    "designerURL": "",
+    "licence": "",
+    "licenceURL": ""
+  }
+}

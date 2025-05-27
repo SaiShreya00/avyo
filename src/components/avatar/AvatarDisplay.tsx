@@ -1,8 +1,10 @@
+
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { Card } from "@/components/ui/card";
 import { getFestivalAvatar, getMoodAvatar } from "@/utils/avatarUtils";
 import { Calendar, Cloud, Sun } from "lucide-react";
+import Avatar3D from "./Avatar3D";
 
 interface AvatarDisplayProps {
   username: string;
@@ -41,12 +43,6 @@ const AvatarDisplay = ({ username, message, isWaving = false }: AvatarDisplayPro
     if (message) {
       const detectedMood = analyzeMood(message);
       setUserMood(detectedMood);
-      
-      // If mood changes to negative, update avatar
-      if (detectedMood === "sad" || detectedMood === "angry") {
-        const moodAvatar = getMoodAvatar(detectedMood);
-        setAvatar(moodAvatar);
-      }
     }
   }, [message]);
 
@@ -93,41 +89,7 @@ const AvatarDisplay = ({ username, message, isWaving = false }: AvatarDisplayPro
           </div>
         )}
 
-        <div className={`w-48 h-48 mx-auto ${isWaving ? "animate-avatar-wave" : "animate-float"}`}>
-          {/* Avatar display */}
-          {avatar ? (
-            <img 
-              src={avatar} 
-              alt="AI Avatar" 
-              className="w-full h-full object-contain" 
-            />
-          ) : (
-            <div className="w-full h-full rounded-full bg-gradient-to-br from-avyo-primary to-avyo-secondary flex items-center justify-center text-white text-6xl font-bold">
-              {/* Default avatar - stylized A matching our logo */}
-              <svg 
-                width="80" 
-                height="80" 
-                viewBox="0 0 120 120" 
-                fill="none" 
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path 
-                  d="M40 90L60 30L80 90" 
-                  stroke="#E3F2F7" 
-                  strokeWidth="10" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                />
-                <path 
-                  d="M45 65H75" 
-                  stroke="#E3F2F7" 
-                  strokeWidth="8" 
-                  strokeLinecap="round" 
-                />
-              </svg>
-            </div>
-          )}
-        </div>
+        <Avatar3D isWaving={isWaving} userMood={userMood} />
         
         <div className="mt-6 text-center">
           <h3 className="text-xl font-bold">
