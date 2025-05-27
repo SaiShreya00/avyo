@@ -18,6 +18,9 @@ const AvatarDisplay = ({ username, message, isWaving = false }: AvatarDisplayPro
   const [news, setNews] = useState("Latest: New advances in AI technology announced today!");
   const [festival, setFestival] = useState("");
   const [userMood, setUserMood] = useState("neutral");
+  const [isThinking, setIsThinking] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -39,10 +42,28 @@ const AvatarDisplay = ({ username, message, isWaving = false }: AvatarDisplayPro
   }, [username, toast]);
 
   useEffect(() => {
-    // Analyze mood if there's a message
+    // Analyze mood and trigger animations if there's a message
     if (message) {
-      const detectedMood = analyzeMood(message);
-      setUserMood(detectedMood);
+      // Show listening animation first
+      setIsListening(true);
+      
+      setTimeout(() => {
+        setIsListening(false);
+        setIsThinking(true);
+        
+        // Analyze mood after "thinking"
+        setTimeout(() => {
+          const detectedMood = analyzeMood(message);
+          setUserMood(detectedMood);
+          setIsThinking(false);
+          setIsSpeaking(true);
+          
+          // Stop speaking after a moment
+          setTimeout(() => {
+            setIsSpeaking(false);
+          }, 2000);
+        }, 1500);
+      }, 1000);
     }
   }, [message]);
 
@@ -69,6 +90,23 @@ const AvatarDisplay = ({ username, message, isWaving = false }: AvatarDisplayPro
     return "neutral";
   };
 
+  const handleAvatarClick = () => {
+    // Trigger random interaction on click
+    const interactions = ["wave", "think", "speak"];
+    const randomInteraction = interactions[Math.floor(Math.random() * interactions.length)];
+    
+    if (randomInteraction === "wave") {
+      setIsWaving(true);
+      setTimeout(() => setIsWaving(false), 2000);
+    } else if (randomInteraction === "think") {
+      setIsThinking(true);
+      setTimeout(() => setIsThinking(false), 3000);
+    } else if (randomInteraction === "speak") {
+      setIsSpeaking(true);
+      setTimeout(() => setIsSpeaking(false), 2000);
+    }
+  };
+
   return (
     <div className="flex flex-col items-center space-y-4">
       <Card className="p-6 bg-gradient-to-br from-avyo-primary/20 to-avyo-highlight shadow-xl rounded-xl relative overflow-hidden border-avyo-accent/30">
@@ -89,29 +127,59 @@ const AvatarDisplay = ({ username, message, isWaving = false }: AvatarDisplayPro
           </div>
         )}
 
-        <Avatar3D isWaving={isWaving} userMood={userMood} />
+        <div onClick={handleAvatarClick} className="cursor-pointer">
+          <Avatar3D 
+            isWaving={isWaving} 
+            userMood={userMood}
+            isThinking={isThinking}
+            isListening={isListening}
+            isSpeaking={isSpeaking}
+          />
+        </div>
         
         <div className="mt-6 text-center">
           <h3 className="text-xl font-bold">
             Hello, <span className="text-avyo-primary">{username || "Friend"}</span>!
           </h3>
           
-          {userMood === "sad" && (
+          {isListening && (
             <p className="mt-2 text-sm text-avyo-accent">
-              It seems you're feeling down. How can I cheer you up today?
+              I'm listening... 👂
             </p>
           )}
           
-          {userMood === "angry" && (
+          {isThinking && (
             <p className="mt-2 text-sm text-avyo-accent">
-              I notice you're frustrated. Let's take a deep breath together.
+              Let me think about that... 🤔
             </p>
           )}
           
-          {(userMood === "neutral" || userMood === "happy") && (
-            <p className="mt-2 text-sm text-gray-600">
-              How can I assist you today?
+          {isSpeaking && (
+            <p className="mt-2 text-sm text-avyo-accent">
+              Here's what I think! 💬
             </p>
+          )}
+          
+          {!isListening && !isThinking && !isSpeaking && (
+            <>
+              {userMood === "sad" && (
+                <p className="mt-2 text-sm text-avyo-accent">
+                  It seems you're feeling down. How can I cheer you up today?
+                </p>
+              )}
+              
+              {userMood === "angry" && (
+                <p className="mt-2 text-sm text-avyo-accent">
+                  I notice you're frustrated. Let's take a deep breath together.
+                </p>
+              )}
+              
+              {(userMood === "neutral" || userMood === "happy") && (
+                <p className="mt-2 text-sm text-gray-600">
+                  How can I assist you today? Click me for a surprise! 
+                </p>
+              )}
+            </>
           )}
         </div>
       </Card>
