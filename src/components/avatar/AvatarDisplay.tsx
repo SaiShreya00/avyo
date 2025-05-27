@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { Card } from "@/components/ui/card";
@@ -12,7 +11,7 @@ interface AvatarDisplayProps {
   isWaving?: boolean;
 }
 
-const AvatarDisplay = ({ username, message, isWaving = false }: AvatarDisplayProps) => {
+const AvatarDisplay = ({ username, message, isWaving: propIsWaving = false }: AvatarDisplayProps) => {
   const [avatar, setAvatar] = useState("");
   const [weather, setWeather] = useState({ temp: "24°C", condition: "Sunny" });
   const [news, setNews] = useState("Latest: New advances in AI technology announced today!");
@@ -21,6 +20,7 @@ const AvatarDisplay = ({ username, message, isWaving = false }: AvatarDisplayPro
   const [isThinking, setIsThinking] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isWaving, setIsWaving] = useState(propIsWaving);
   const { toast } = useToast();
 
   useEffect(() => {
