@@ -25,6 +25,7 @@ const RobotMesh = ({
   const headRef = useRef<THREE.Group>(null);
   const eyesRef = useRef<THREE.Group>(null);
   const antennaRef = useRef<THREE.Group>(null);
+  const processingDotsRef = useRef<THREE.Group>(null);
   const [blinkPhase, setBlinkPhase] = useState(0);
   
   // Get mood-based colors for robot
@@ -82,6 +83,16 @@ const RobotMesh = ({
       const blinkTime = state.clock.elapsedTime * 0.5;
       const shouldBlink = Math.sin(blinkTime) > 0.98;
       eyesRef.current.scale.y = shouldBlink ? 0.1 : 1;
+    }
+
+    // Processing dots animation
+    if (processingDotsRef.current && isThinking) {
+      const dots = processingDotsRef.current.children;
+      dots.forEach((dot, i) => {
+        if (dot instanceof THREE.Mesh) {
+          dot.scale.setScalar(Math.sin(state.clock.elapsedTime * 3 + i) * 0.5 + 1);
+        }
+      });
     }
   });
 
@@ -264,12 +275,14 @@ const RobotMesh = ({
             <meshStandardMaterial color={bodyColor} emissive={bodyColor} emissiveIntensity={0.3} />
           </mesh>
           {/* Processing dots */}
-          {[-0.08, 0, 0.08].map((x, i) => (
-            <mesh key={i} position={[x, 0, 0.04]} scale={[1, 1, Math.sin(state.clock.elapsedTime * 3 + i) * 0.5 + 1]}>
-              <sphereGeometry args={[0.02, 8, 8]} />
-              <meshStandardMaterial color={bodyColor} emissive={bodyColor} emissiveIntensity={0.5} />
-            </mesh>
-          ))}
+          <group ref={processingDotsRef}>
+            {[-0.08, 0, 0.08].map((x, i) => (
+              <mesh key={i} position={[x, 0, 0.04]}>
+                <sphereGeometry args={[0.02, 8, 8]} />
+                <meshStandardMaterial color={bodyColor} emissive={bodyColor} emissiveIntensity={0.5} />
+              </mesh>
+            ))}
+          </group>
         </group>
       )}
 
