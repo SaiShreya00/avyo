@@ -7,56 +7,82 @@ import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
 import { Apple, Mail } from "lucide-react";
+import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 
 interface LoginFormProps {
   onLogin: (username: string) => void;
 }
 
 const LoginForm = ({ onLogin }: LoginFormProps) => {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { signInWithEmail, signInWithGoogle, signInWithMicrosoft, signInWithApple } = useFirebaseAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // For demo purposes, we'll just simulate a login
-    setTimeout(() => {
+    try {
+      const userCredential = await signInWithEmail(email, password);
+      const user = userCredential.user;
+      
+      toast({
+        title: "Login successful!",
+        description: `Welcome back, ${user.displayName || user.email}!`,
+      });
+      
+      onLogin(user.displayName || user.email || 'User');
+      navigate("/dashboard");
+    } catch (error: any) {
+      toast({
+        title: "Login failed",
+        description: error.message || "Please check your credentials.",
+        variant: "destructive",
+      });
+    } finally {
       setIsLoading(false);
-      if (username && password.length >= 4) {
-        toast({
-          title: "Login successful!",
-          description: `Welcome back, ${username}!`,
-        });
-        onLogin(username);
-        navigate("/dashboard");
-      } else {
-        toast({
-          title: "Login failed",
-          description: "Please check your username and password.",
-          variant: "destructive",
-        });
-      }
-    }, 1500);
+    }
   };
 
-  const handleSocialLogin = (provider: string) => {
+  const handleSocialLogin = async (provider: 'google' | 'microsoft' | 'apple') => {
     setIsLoading(true);
     
-    // Simulate social login
-    setTimeout(() => {
-      setIsLoading(false);
-      const mockUsername = `user_${provider.toLowerCase()}`;
+    try {
+      let userCredential;
+      
+      switch (provider) {
+        case 'google':
+          userCredential = await signInWithGoogle();
+          break;
+        case 'microsoft':
+          userCredential = await signInWithMicrosoft();
+          break;
+        case 'apple':
+          userCredential = await signInWithApple();
+          break;
+      }
+      
+      const user = userCredential.user;
+      
       toast({
         title: "Login successful!",
         description: `Welcome with ${provider}!`,
       });
-      onLogin(mockUsername);
+      
+      onLogin(user.displayName || user.email || 'User');
       navigate("/dashboard");
-    }, 1000);
+    } catch (error: any) {
+      toast({
+        title: "Login failed",
+        description: error.message || `Failed to sign in with ${provider}.`,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -72,7 +98,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
             type="button"
             variant="outline"
             disabled={isLoading}
-            onClick={() => handleSocialLogin("Google")}
+            onClick={() => handleSocialLogin('google')}
             className="flex items-center justify-center gap-2"
           >
             <svg 
@@ -93,7 +119,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
             type="button"
             variant="outline"
             disabled={isLoading}
-            onClick={() => handleSocialLogin("Microsoft")}
+            onClick={() => handleSocialLogin('microsoft')}
             className="flex items-center justify-center gap-2"
           >
             <svg
@@ -114,7 +140,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
             type="button"
             variant="outline"
             disabled={isLoading}
-            onClick={() => handleSocialLogin("Apple")}
+            onClick={() => handleSocialLogin('apple')}
             className="flex items-center justify-center gap-2"
           >
             <Apple size={20} />
@@ -136,10 +162,11 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Input
-              id="username"
-              placeholder="Your name"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              id="email"
+              type="email"
+              placeholder="Email address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
               autoFocus
               className="focus-visible:ring-avyo-primary"

@@ -12,18 +12,18 @@ import { useToast } from "@/components/ui/use-toast";
 import AvyoLogo from "@/components/logo/AvyoLogo";
 
 const Dashboard = () => {
-  const { username, setUsername } = useContext(UserContext);
+  const { username, isAuthenticated, logout } = useContext(UserContext);
   const [currentMessage, setCurrentMessage] = useState("");
   const [isWaving, setIsWaving] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
-    // If no username is set, redirect to login
-    if (!username) {
+    // If no user is authenticated, redirect to login
+    if (!isAuthenticated) {
       navigate("/");
     }
-  }, [username, navigate]);
+  }, [isAuthenticated, navigate]);
 
   const handleMessageSent = (message: string) => {
     setCurrentMessage(message);
@@ -35,16 +35,24 @@ const Dashboard = () => {
     }
   };
 
-  const handleLogout = () => {
-    toast({
-      title: "Logged out",
-      description: "You have been successfully logged out.",
-    });
-    setUsername("");
-    navigate("/");
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast({
+        title: "Logged out",
+        description: "You have been successfully logged out.",
+      });
+      navigate("/");
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to log out. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
-  if (!username) {
+  if (!isAuthenticated) {
     return null; // Will redirect via the useEffect
   }
 
