@@ -1,68 +1,96 @@
 
-// Placeholder for actual AI integration
+// Real AI integration with OpenAI API
 
-// Mock response generation - in a real app, this would call an AI API
-export const generateAIResponse = async (
-  message: string,
-  username: string
-): Promise<string> => {
-  // Simulate API delay
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+// Function to check if content should be moderated
+export const moderateContent = async (content: string): Promise<boolean> => {
+  try {
+    const response = await fetch('https://api.openai.com/v1/moderations', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        input: content,
+      }),
+    });
 
-  // Some predefined responses based on message content
-  if (message.toLowerCase().includes("hello") || message.toLowerCase().includes("hi")) {
-    return `Hello ${username}! How are you feeling today?`;
+    const data = await response.json();
+    return data.results[0].flagged;
+  } catch (error) {
+    console.error('Moderation check failed:', error);
+    return false; // Allow content if moderation fails
   }
-
-  if (message.toLowerCase().includes("how are you")) {
-    return `I'm doing great, ${username}! Thanks for asking. How can I assist you today?`;
-  }
-
-  if (message.toLowerCase().includes("weather")) {
-    return `Currently it's 24°C and sunny outside. Perfect day to go for a walk, ${username}!`;
-  }
-
-  if (message.toLowerCase().includes("news")) {
-    return `Today's top news: New advances in AI technology announced today! Scientists have created more realistic virtual avatars that can recognize human emotions.`;
-  }
-
-  if (message.toLowerCase().includes("sad") || message.toLowerCase().includes("unhappy")) {
-    return `I'm sorry to hear you're feeling down, ${username}. Would you like me to suggest some mood-lifting activities or perhaps tell you a joke?`;
-  }
-
-  if (message.toLowerCase().includes("joke")) {
-    const jokes = [
-      "Why don't scientists trust atoms? Because they make up everything!",
-      "Why did the AI go to art school? To learn how to draw conclusions!",
-      `What do you call ${username} who loves telling dad jokes? A faux pa!`,
-      "Why did the computer show up at work late? It had a hard drive!",
-    ];
-    return `Here's a joke for you: ${jokes[Math.floor(Math.random() * jokes.length)]} 😄`;
-  }
-
-  if (message.toLowerCase().includes("thank")) {
-    return `You're very welcome, ${username}! I'm always here to help.`;
-  }
-
-  // Default responses
-  const defaultResponses = [
-    `That's interesting, ${username}. Tell me more about that.`,
-    `I understand, ${username}. How else can I assist you today?`,
-    `Thanks for sharing that with me, ${username}. Is there anything specific you'd like to know?`,
-    `I appreciate your input, ${username}. Let me know if you have any questions.`,
-  ];
-
-  return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
 };
 
-// Function to detect user's mood from their messages
+// Enhanced AI response generation with GPT-4
+export const generateAIResponse = async (
+  message: string,
+  username: string,
+  conversationHistory: { role: string; content: string }[] = []
+): Promise<string> => {
+  // Check for inappropriate content first
+  const isInappropriate = await moderateContent(message);
+  if (isInappropriate) {
+    return `I'm sorry ${username}, but I can't respond to that type of message. Let's keep our conversation friendly and appropriate.`;
+  }
+
+  try {
+    const messages = [
+      {
+        role: "system",
+        content: `You are Avyo, a friendly and helpful AI assistant. You're talking to ${username}. Be conversational, empathetic, and helpful. Keep responses concise but engaging.`
+      },
+      ...conversationHistory.slice(-6), // Keep last 6 messages for context
+      {
+        role: "user",
+        content: message
+      }
+    ];
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: messages,
+        max_tokens: 500,
+        temperature: 0.7,
+        presence_penalty: 0.6,
+        frequency_penalty: 0.5,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`OpenAI API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.choices[0].message.content;
+  } catch (error) {
+    console.error('AI response generation failed:', error);
+    
+    // Fallback responses when API fails
+    const fallbackResponses = [
+      `I'm having trouble connecting right now, ${username}. Please try again in a moment.`,
+      `Sorry ${username}, I'm experiencing some technical difficulties. Let me try to help you differently.`,
+      `I'm currently offline, ${username}. Please check your connection and try again.`,
+    ];
+    
+    return fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
+  }
+};
+
+// Function to detect user's mood from their messages (enhanced)
 export const detectMood = (messages: string[]): "happy" | "sad" | "angry" | "neutral" => {
-  // This would be much more sophisticated in a real app, possibly using NLP
   const combinedText = messages.join(" ").toLowerCase();
   
-  const happyTerms = ["happy", "great", "awesome", "excellent", "joy", "love", "like", ":)", "😊", "😄"];
-  const sadTerms = ["sad", "unhappy", "depressed", "disappointed", "upset", "down", ":(", "😢", "😭"];
-  const angryTerms = ["angry", "mad", "frustrated", "annoyed", "furious", "hate", "😠", "😡"];
+  const happyTerms = ["happy", "great", "awesome", "excellent", "joy", "love", "like", "amazing", "wonderful", "fantastic", ":)", "😊", "😄", "😍"];
+  const sadTerms = ["sad", "unhappy", "depressed", "disappointed", "upset", "down", "crying", "hurt", "lonely", ":(", "😢", "😭", "😞"];
+  const angryTerms = ["angry", "mad", "frustrated", "annoyed", "furious", "hate", "rage", "pissed", "irritated", "😠", "😡", "🤬"];
   
   let happyScore = 0;
   let sadScore = 0;

@@ -37,6 +37,7 @@ const ChatInterface = ({ username, onMessageSent }: ChatInterfaceProps) => {
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+  const [conversationHistory, setConversationHistory] = useState<{ role: string; content: string }[]>([]);
   const endOfMessagesRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -63,28 +64,37 @@ const ChatInterface = ({ username, onMessageSent }: ChatInterfaceProps) => {
     };
     
     setMessages((prev) => [...prev, userMessage]);
-    onMessageSent(input); // Pass message to parent for mood analysis
+    onMessageSent(input);
+    
+    // Update conversation history
+    const newHistory = [...conversationHistory, { role: "user", content: input }];
+    setConversationHistory(newHistory);
+    
+    const currentInput = input;
     setInput("");
     setIsTyping(true);
     
     try {
-      // Get AI response
-      const response = await generateAIResponse(input, username);
+      // Get AI response with conversation context
+      const response = await generateAIResponse(currentInput, username, newHistory);
       
       // Add AI response to chat
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: (Date.now() + 1).toString(),
-          content: response,
-          sender: "ai",
-          timestamp: new Date(),
-        },
-      ]);
+      const aiMessage = {
+        id: (Date.now() + 1).toString(),
+        content: response,
+        sender: "ai" as const,
+        timestamp: new Date(),
+      };
+      
+      setMessages((prev) => [...prev, aiMessage]);
+      
+      // Update conversation history with AI response
+      setConversationHistory(prev => [...prev, { role: "assistant", content: response }]);
       
       // Increment the questions counter
       incrementQuestionsAsked();
     } catch (error) {
+      console.error('Chat error:', error);
       toast({
         title: "Error",
         description: "Failed to generate a response. Please try again.",

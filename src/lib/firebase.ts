@@ -1,14 +1,15 @@
 
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
+import { config } from '@/config/environment';
 
 const firebaseConfig = {
-  apiKey: "your-api-key",
-  authDomain: "your-project.firebaseapp.com",
-  projectId: "your-project-id",
-  storageBucket: "your-project.appspot.com",
-  messagingSenderId: "123456789",
-  appId: "your-app-id"
+  apiKey: config.firebase.apiKey,
+  authDomain: config.firebase.authDomain,
+  projectId: config.firebase.projectId,
+  storageBucket: config.firebase.storageBucket,
+  messagingSenderId: config.firebase.messagingSenderId,
+  appId: config.firebase.appId
 };
 
 const app = initializeApp(firebaseConfig);

@@ -1,8 +1,11 @@
+
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { Card } from "@/components/ui/card";
 import { getFestivalAvatar, getMoodAvatar } from "@/utils/avatarUtils";
-import { Calendar, Cloud, Sun } from "lucide-react";
+import { fetchWeatherData, getUserLocation, WeatherData } from "@/utils/weatherUtils";
+import { fetchNewsHeadlines, NewsArticle } from "@/utils/newsUtils";
+import { Calendar, Cloud, Sun, Thermometer, MapPin } from "lucide-react";
 import Avatar3D from "./Avatar3D";
 
 interface AvatarDisplayProps {
@@ -13,8 +16,14 @@ interface AvatarDisplayProps {
 
 const AvatarDisplay = ({ username, message, isWaving: propIsWaving = false }: AvatarDisplayProps) => {
   const [avatar, setAvatar] = useState("");
-  const [weather, setWeather] = useState({ temp: "24°C", condition: "Sunny" });
-  const [news, setNews] = useState("Latest: New advances in AI technology announced today!");
+  const [weather, setWeather] = useState<WeatherData>({ 
+    temperature: 24, 
+    condition: "Sunny", 
+    description: "clear sky",
+    icon: "01d",
+    location: "Your Location"
+  });
+  const [news, setNews] = useState<NewsArticle[]>([]);
   const [festival, setFestival] = useState("");
   const [userMood, setUserMood] = useState("neutral");
   const [isThinking, setIsThinking] = useState(false);
@@ -24,13 +33,37 @@ const AvatarDisplay = ({ username, message, isWaving: propIsWaving = false }: Av
   const { toast } = useToast();
 
   useEffect(() => {
+    // Initialize weather and news data
+    const initializeData = async () => {
+      try {
+        // Get user location and fetch weather
+        const location = await getUserLocation();
+        const weatherData = await fetchWeatherData(location.lat, location.lon);
+        setWeather(weatherData);
+        
+        // Fetch news headlines
+        const newsData = await fetchNewsHeadlines();
+        setNews(newsData);
+      } catch (error) {
+        console.warn('Could not fetch location data:', error);
+        // Fallback to default location weather
+        const weatherData = await fetchWeatherData();
+        setWeather(weatherData);
+        
+        const newsData = await fetchNewsHeadlines();
+        setNews(newsData);
+      }
+    };
+
+    initializeData();
+
     // Detect current festival
     const today = new Date();
     const festivalInfo = getFestivalAvatar(today);
     setAvatar(festivalInfo.avatarSrc);
     setFestival(festivalInfo.name);
 
-    // For demo: show a welcome message
+    // Show welcome message
     if (username) {
       toast({
         title: `Hello, ${username}!`,
@@ -110,14 +143,18 @@ const AvatarDisplay = ({ username, message, isWaving: propIsWaving = false }: Av
   return (
     <div className="flex flex-col items-center space-y-4">
       <Card className="p-6 bg-gradient-to-br from-avyo-primary/20 to-avyo-highlight shadow-xl rounded-xl relative overflow-hidden border-avyo-accent/30">
-        <div className="absolute top-4 right-4 flex space-x-2 text-avyo-dark/70">
+        <div className="absolute top-4 right-4 flex flex-col space-y-2 text-avyo-dark/70">
           <div className="flex items-center gap-1">
             <Calendar size={16} />
             <span className="text-xs">{new Date().toLocaleDateString()}</span>
           </div>
           <div className="flex items-center gap-1">
-            <Sun size={16} />
-            <span className="text-xs">{weather.temp}</span>
+            <Thermometer size={16} />
+            <span className="text-xs">{weather.temperature}°C</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <MapPin size={14} />
+            <span className="text-xs">{weather.location}</span>
           </div>
         </div>
         
@@ -181,15 +218,25 @@ const AvatarDisplay = ({ username, message, isWaving: propIsWaving = false }: Av
               )}
             </>
           )}
+          
+          <div className="mt-3 text-xs text-gray-500">
+            {weather.description} • {weather.condition}
+          </div>
         </div>
       </Card>
       
       <div className="w-full max-w-md bg-white rounded-lg shadow-md p-3 border border-avyo-primary/20">
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 mb-2">
           <Cloud className="text-avyo-primary" size={18} />
-          <h4 className="text-sm font-medium text-gray-700">Today's Highlights</h4>
+          <h4 className="text-sm font-medium text-gray-700">Today's Headlines</h4>
         </div>
-        <p className="mt-1 text-xs text-gray-600">{news}</p>
+        <div className="space-y-1">
+          {news.slice(0, 2).map((article, index) => (
+            <p key={index} className="text-xs text-gray-600 truncate">
+              • {article.title}
+            </p>
+          ))}
+        </div>
       </div>
     </div>
   );
