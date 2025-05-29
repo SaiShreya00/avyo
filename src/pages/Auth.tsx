@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -30,7 +29,28 @@ const Auth = () => {
       }
     };
     checkUser();
-  }, [navigate]);
+
+    // Listen for auth state changes (handles OAuth redirects)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('Auth state changed:', event, session);
+        
+        if (event === 'SIGNED_IN' && session) {
+          toast({
+            title: "Welcome!",
+            description: "You have been successfully logged in.",
+          });
+          navigate("/dashboard");
+        }
+        
+        if (event === 'SIGNED_OUT') {
+          navigate("/auth");
+        }
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, [navigate, toast]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,11 +105,18 @@ const Auth = () => {
         if (error) throw error;
 
         if (data.user) {
-          toast({
-            title: "Account created!",
-            description: "Welcome to Avyo! You can now start chatting.",
-          });
-          navigate("/dashboard");
+          if (data.user.email_confirmed_at) {
+            toast({
+              title: "Account created!",
+              description: "Welcome to Avyo! You can now start chatting.",
+            });
+            navigate("/dashboard");
+          } else {
+            toast({
+              title: "Check your email!",
+              description: "We sent you a confirmation link. Please check your email to complete registration.",
+            });
+          }
         }
       }
     } catch (error: any) {
@@ -103,6 +130,8 @@ const Auth = () => {
         errorMessage = "Password should be at least 6 characters long.";
       } else if (error.message.includes("Invalid email")) {
         errorMessage = "Please enter a valid email address.";
+      } else if (error.message.includes("Email not confirmed")) {
+        errorMessage = "Please check your email and click the confirmation link before signing in.";
       } else if (error.message) {
         errorMessage = error.message;
       }
@@ -121,20 +150,42 @@ const Auth = () => {
     setLoading(true);
     
     try {
+      console.log(`Attempting ${provider} login...`);
+      
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: provider,
         options: {
           redirectTo: `${window.location.origin}/dashboard`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error(`${provider} login error:`, error);
+        throw error;
+      }
 
+      console.log(`${provider} login initiated:`, data);
+      
       // Note: The redirect will happen automatically, so we don't need to manually navigate
+      // The loading state will be reset when the component unmounts during redirect
     } catch (error: any) {
+      console.error(`${provider} login failed:`, error);
+      
+      let errorMessage = `Failed to sign in with ${provider}.`;
+      
+      if (error.message.includes("provider is not enabled")) {
+        errorMessage = `${provider} login is not configured yet. Please contact support.`;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: "Login failed",
-        description: error.message || `Failed to sign in with ${provider}.`,
+        description: errorMessage,
         variant: "destructive",
       });
       setLoading(false);
