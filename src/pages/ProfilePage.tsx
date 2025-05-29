@@ -1,21 +1,39 @@
 
-import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { UserContext } from "@/context/UserContext";
-import { ArrowLeft, User } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { ArrowLeft } from "lucide-react";
 import AvyoLogo from "@/components/logo/AvyoLogo";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useEffect } from "react";
 
 const ProfilePage = () => {
-  const { username } = useContext(UserContext);
+  const { user, loading } = useAuth();
   const navigate = useNavigate();
 
-  if (!username) {
-    navigate("/");
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate("/auth");
+    }
+  }, [user, loading, navigate]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-avyo-primary/10 to-avyo-accent/5 flex items-center justify-center">
+        <div className="text-center">
+          <AvyoLogo size={60} />
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
     return null;
   }
+
+  const username = user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-avyo-primary/10 to-avyo-accent/5 p-4 md:p-8">
@@ -55,7 +73,7 @@ const ProfilePage = () => {
               <div className="space-y-3">
                 <div>
                   <p className="text-sm text-gray-500">Email</p>
-                  <p>{username.toLowerCase()}@example.com</p>
+                  <p>{user.email}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Plan</p>
@@ -63,7 +81,7 @@ const ProfilePage = () => {
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Member Since</p>
-                  <p>May 2023</p>
+                  <p>{new Date(user.created_at).toLocaleDateString()}</p>
                 </div>
               </div>
             </Card>

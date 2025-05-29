@@ -1,29 +1,27 @@
 
-import { useState, useContext, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AvatarDisplay from "@/components/avatar/AvatarDisplay";
 import ChatInterface from "@/components/chat/ChatInterface";
-import { UserContext } from "@/context/UserContext";
-import { LogOut, MessageCircle } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { LogOut } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import AvyoLogo from "@/components/logo/AvyoLogo";
 
 const Dashboard = () => {
-  const { username, isAuthenticated, logout } = useContext(UserContext);
+  const { user, loading, signOut } = useAuth();
   const [currentMessage, setCurrentMessage] = useState("");
   const [isWaving, setIsWaving] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
-    // If no user is authenticated, redirect to login
-    if (!isAuthenticated) {
-      navigate("/");
+    if (!loading && !user) {
+      navigate("/auth");
     }
-  }, [isAuthenticated, navigate]);
+  }, [user, loading, navigate]);
 
   const handleMessageSent = (message: string) => {
     setCurrentMessage(message);
@@ -37,12 +35,12 @@ const Dashboard = () => {
 
   const handleLogout = async () => {
     try {
-      await logout();
+      await signOut();
       toast({
         title: "Logged out",
         description: "You have been successfully logged out.",
       });
-      navigate("/");
+      navigate("/auth");
     } catch (error) {
       toast({
         title: "Error",
@@ -52,9 +50,22 @@ const Dashboard = () => {
     }
   };
 
-  if (!isAuthenticated) {
-    return null; // Will redirect via the useEffect
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-avyo-primary/10 to-avyo-accent/5 flex items-center justify-center">
+        <div className="text-center">
+          <AvyoLogo size={60} />
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
   }
+
+  if (!user) {
+    return null;
+  }
+
+  const username = user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-avyo-primary/10 to-avyo-accent/5 p-4 md:p-8">

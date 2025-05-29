@@ -1,16 +1,32 @@
-import LoginForm from "@/components/auth/LoginForm";
-import { useContext } from "react";
-import { UserContext } from "@/context/UserContext";
-import AvyoLogo from "@/components/logo/AvyoLogo";
+
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { useAuth } from "@/context/AuthContext";
+import AvyoLogo from "@/components/logo/AvyoLogo";
 import { MessageCircle } from "lucide-react";
 
 const Login = () => {
-  const { setUsername } = useContext(UserContext);
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
 
-  const handleLogin = (username: string) => {
-    setUsername(username);
-  };
+  useEffect(() => {
+    if (!loading && user) {
+      navigate("/dashboard");
+    }
+  }, [user, loading, navigate]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-avyo-primary/10 to-avyo-accent/5 flex items-center justify-center">
+        <div className="text-center">
+          <AvyoLogo size={60} />
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-avyo-primary/10 to-avyo-accent/5">
@@ -45,7 +61,28 @@ const Login = () => {
         </div>
         
         <div className="w-full max-w-md">
-          <LoginForm onLogin={handleLogin} />
+          <Card className="p-6 shadow-lg">
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold text-avyo-dark mb-2">
+                Get Started with Avyo
+              </h2>
+              <p className="text-gray-600">
+                Create your account or sign in to continue
+              </p>
+            </div>
+            
+            <div className="space-y-3">
+              <Button 
+                onClick={() => navigate("/auth")}
+                className="w-full bg-avyo-primary hover:bg-avyo-secondary"
+              >
+                Sign In / Sign Up
+              </Button>
+              <p className="text-center text-sm text-gray-500">
+                Start your AI conversation today
+              </p>
+            </div>
+          </Card>
         </div>
       </section>
       
