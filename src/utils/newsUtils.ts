@@ -1,4 +1,6 @@
 
+import { config } from '@/config/environment';
+
 export interface NewsArticle {
   title: string;
   description: string;
@@ -10,7 +12,7 @@ export interface NewsArticle {
 export const fetchNewsHeadlines = async (category: string = 'technology'): Promise<NewsArticle[]> => {
   try {
     const response = await fetch(
-      `https://newsapi.org/v2/top-headlines?country=us&category=${category}&pageSize=5&apiKey=${process.env.REACT_APP_NEWS_API_KEY}`
+      `https://newsapi.org/v2/top-headlines?country=us&category=${category}&pageSize=5&apiKey=${config.news.apiKey}`
     );
 
     if (!response.ok) {

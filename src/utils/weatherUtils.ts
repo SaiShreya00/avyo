@@ -1,4 +1,6 @@
 
+import { config } from '@/config/environment';
+
 export interface WeatherData {
   temperature: number;
   condition: string;
@@ -9,7 +11,7 @@ export interface WeatherData {
 
 export const fetchWeatherData = async (lat?: number, lon?: number): Promise<WeatherData> => {
   try {
-    let weatherUrl = `https://api.openweathermap.org/data/2.5/weather?appid=${process.env.REACT_APP_OPENWEATHER_API_KEY}&units=metric`;
+    let weatherUrl = `https://api.openweathermap.org/data/2.5/weather?appid=${config.weather.apiKey}&units=metric`;
     
     if (lat && lon) {
       weatherUrl += `&lat=${lat}&lon=${lon}`;

@@ -1,27 +1,27 @@
 
 // Environment configuration for API keys
-// Users need to set these as environment variables
+// Users need to set these as environment variables with VITE_ prefix
 
 export const config = {
   firebase: {
-    apiKey: process.env.REACT_APP_FIREBASE_API_KEY || "your-api-key",
-    authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN || "your-project.firebaseapp.com",
-    projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID || "your-project-id",
-    storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET || "your-project.appspot.com",
-    messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID || "123456789",
-    appId: process.env.REACT_APP_FIREBASE_APP_ID || "your-app-id"
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "your-api-key",
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "your-project.firebaseapp.com",
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "your-project-id",
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "your-project.appspot.com",
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "123456789",
+    appId: import.meta.env.VITE_FIREBASE_APP_ID || "your-app-id"
   },
   openai: {
-    apiKey: process.env.REACT_APP_OPENAI_API_KEY
+    apiKey: import.meta.env.VITE_OPENAI_API_KEY
   },
   weather: {
-    apiKey: process.env.REACT_APP_OPENWEATHER_API_KEY
+    apiKey: import.meta.env.VITE_OPENWEATHER_API_KEY
   },
   news: {
-    apiKey: process.env.REACT_APP_NEWS_API_KEY
+    apiKey: import.meta.env.VITE_NEWS_API_KEY
   },
   stripe: {
-    publishableKey: process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY
+    publishableKey: import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
   }
 };
 
@@ -29,9 +29,9 @@ export const config = {
 export const validateEnvironment = () => {
   const missing = [];
   
-  if (!config.openai.apiKey) missing.push('REACT_APP_OPENAI_API_KEY');
-  if (!config.weather.apiKey) missing.push('REACT_APP_OPENWEATHER_API_KEY');
-  if (!config.news.apiKey) missing.push('REACT_APP_NEWS_API_KEY');
+  if (!config.openai.apiKey) missing.push('VITE_OPENAI_API_KEY');
+  if (!config.weather.apiKey) missing.push('VITE_OPENWEATHER_API_KEY');
+  if (!config.news.apiKey) missing.push('VITE_NEWS_API_KEY');
   
   if (missing.length > 0) {
     console.warn('Missing environment variables:', missing);

@@ -1,5 +1,5 @@
 
-// Real AI integration with OpenAI API
+import { config } from '@/config/environment';
 
 // Function to check if content should be moderated
 export const moderateContent = async (content: string): Promise<boolean> => {
@@ -7,7 +7,7 @@ export const moderateContent = async (content: string): Promise<boolean> => {
     const response = await fetch('https://api.openai.com/v1/moderations', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`,
+        'Authorization': `Bearer ${config.openai.apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -51,7 +51,7 @@ export const generateAIResponse = async (
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`,
+        'Authorization': `Bearer ${config.openai.apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
