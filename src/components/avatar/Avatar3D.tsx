@@ -12,7 +12,7 @@ interface Avatar3DProps {
   isSpeaking?: boolean;
 }
 
-const RobotMesh = ({ 
+const HumanMesh = ({ 
   isWaving = false, 
   userMood = "neutral",
   isThinking = false,
@@ -24,280 +24,264 @@ const RobotMesh = ({
   const rightArmRef = useRef<THREE.Group>(null);
   const headRef = useRef<THREE.Group>(null);
   const eyesRef = useRef<THREE.Group>(null);
-  const antennaRef = useRef<THREE.Group>(null);
-  const processingDotsRef = useRef<THREE.Group>(null);
+  const mouthRef = useRef<THREE.Group>(null);
   const [blinkPhase, setBlinkPhase] = useState(0);
   
-  // Get mood-based colors for robot
-  const getMoodColor = (mood: string) => {
+  // Get mood-based colors and expressions
+  const getMoodExpression = (mood: string) => {
     switch (mood) {
-      case "happy": return "#4ade80"; // green
-      case "sad": return "#60a5fa"; // blue
-      case "angry": return "#f87171"; // red
-      default: return "#71717a"; // neutral gray
+      case "happy": return { eyeScale: 0.8, mouthCurve: 0.1, skinTone: "#fdbcb4" };
+      case "sad": return { eyeScale: 0.6, mouthCurve: -0.1, skinTone: "#f4a6a6" };
+      case "angry": return { eyeScale: 0.4, mouthCurve: -0.15, skinTone: "#f87171" };
+      default: return { eyeScale: 1, mouthCurve: 0, skinTone: "#fdbcb4" };
     }
   };
 
+  const expression = getMoodExpression(userMood);
+  const skinColor = expression.skinTone;
+  const hairColor = "#8b4513"; // Brown hair
+  const eyeColor = "#4a5568"; // Dark gray eyes
+  const clothingColor = "#3182ce"; // Blue shirt
+
   useFrame((state) => {
     if (meshRef.current) {
-      // Gentle floating animation
-      meshRef.current.position.y = Math.sin(state.clock.elapsedTime) * 0.1;
+      // Gentle breathing animation
+      meshRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.8) * 0.02;
       
       if (!isThinking && !isListening) {
-        meshRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.05;
+        // Subtle idle movement
+        meshRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.3) * 0.02;
       }
     }
     
     // Head animations
     if (headRef.current) {
       if (isThinking) {
-        // Thinking: slow head tilt side to side
-        headRef.current.rotation.z = Math.sin(state.clock.elapsedTime * 0.8) * 0.15;
+        // Thinking: slight head tilt and occasional nods
+        headRef.current.rotation.z = Math.sin(state.clock.elapsedTime * 0.5) * 0.08;
+        headRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.3) * 0.05;
       } else if (isListening) {
-        // Listening: slight forward lean and occasional nods
-        headRef.current.rotation.x = -0.1 + Math.sin(state.clock.elapsedTime * 2) * 0.05;
+        // Listening: attentive forward lean
+        headRef.current.rotation.x = -0.05 + Math.sin(state.clock.elapsedTime * 1.5) * 0.03;
       } else if (isSpeaking) {
-        // Speaking: slight up and down movement
-        headRef.current.position.y = Math.sin(state.clock.elapsedTime * 3) * 0.02;
+        // Speaking: natural head movement
+        headRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 2) * 0.03;
+        headRef.current.position.y = Math.sin(state.clock.elapsedTime * 4) * 0.01;
       }
-    }
-    
-    // Antenna animation
-    if (antennaRef.current) {
-      antennaRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 2) * 0.1;
     }
     
     // Waving animation
     if (leftArmRef.current && isWaving) {
-      leftArmRef.current.rotation.z = Math.sin(state.clock.elapsedTime * 4) * 0.5 + 0.5;
+      leftArmRef.current.rotation.z = Math.sin(state.clock.elapsedTime * 3) * 0.4 + 0.6;
+      leftArmRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 3) * 0.1;
     }
     
     // Thinking gesture - hand to chin
     if (rightArmRef.current && isThinking) {
-      rightArmRef.current.rotation.z = -0.8;
-      rightArmRef.current.rotation.x = 0.3;
+      rightArmRef.current.rotation.z = -0.6;
+      rightArmRef.current.rotation.x = 0.2;
     }
     
-    // Robotic blinking animation (more mechanical)
+    // Natural blinking animation
     if (eyesRef.current) {
-      const blinkTime = state.clock.elapsedTime * 0.5;
-      const shouldBlink = Math.sin(blinkTime) > 0.98;
-      eyesRef.current.scale.y = shouldBlink ? 0.1 : 1;
+      const blinkTime = state.clock.elapsedTime * 0.8;
+      const shouldBlink = Math.sin(blinkTime) > 0.95;
+      eyesRef.current.scale.y = shouldBlink ? 0.1 : expression.eyeScale;
     }
 
-    // Processing dots animation
-    if (processingDotsRef.current && isThinking) {
-      const dots = processingDotsRef.current.children;
-      dots.forEach((dot, i) => {
-        if (dot instanceof THREE.Mesh) {
-          dot.scale.setScalar(Math.sin(state.clock.elapsedTime * 3 + i) * 0.5 + 1);
-        }
-      });
+    // Mouth animation for speaking
+    if (mouthRef.current && isSpeaking) {
+      const talkAnim = Math.sin(state.clock.elapsedTime * 8) * 0.05;
+      mouthRef.current.scale.y = 1 + talkAnim;
     }
   });
 
-  const bodyColor = getMoodColor(userMood);
-  const metalColor = "#a1a1aa"; // zinc color for metal parts
-
   return (
     <group ref={meshRef}>
-      {/* Robot Head - more angular */}
-      <group ref={headRef} position={[0, 1.5, 0]}>
+      {/* Human Head */}
+      <group ref={headRef} position={[0, 1.4, 0]}>
+        {/* Face */}
         <mesh>
-          <boxGeometry args={[0.8, 0.8, 0.8]} />
-          <meshStandardMaterial color={metalColor} metalness={0.8} roughness={0.2} />
+          <sphereGeometry args={[0.35, 16, 16]} />
+          <meshStandardMaterial color={skinColor} roughness={0.8} metalness={0.1} />
         </mesh>
 
-        {/* Robot Eyes - LED style */}
+        {/* Hair */}
+        <mesh position={[0, 0.1, -0.1]}>
+          <sphereGeometry args={[0.38, 16, 16]} />
+          <meshStandardMaterial color={hairColor} roughness={0.9} metalness={0.0} />
+        </mesh>
+
+        {/* Eyes */}
         <group ref={eyesRef}>
-          <mesh position={[-0.2, 0.1, 0.41]}>
-            <cylinderGeometry args={[0.08, 0.08, 0.1, 8]} />
-            <meshStandardMaterial color={bodyColor} emissive={bodyColor} emissiveIntensity={0.3} />
+          {/* Eye whites */}
+          <mesh position={[-0.12, 0.05, 0.32]}>
+            <sphereGeometry args={[0.04, 8, 8]} />
+            <meshStandardMaterial color="#ffffff" />
           </mesh>
-          <mesh position={[0.2, 0.1, 0.41]}>
-            <cylinderGeometry args={[0.08, 0.08, 0.1, 8]} />
-            <meshStandardMaterial color={bodyColor} emissive={bodyColor} emissiveIntensity={0.3} />
-          </mesh>
-        </group>
-
-        {/* Robot Mouth - Speaker grille */}
-        <mesh position={[0, -0.15, 0.41]}>
-          <boxGeometry args={[0.3, 0.1, 0.05]} />
-          <meshStandardMaterial color="#000000" />
-        </mesh>
-        
-        {/* Speaker lines */}
-        {[-0.1, 0, 0.1].map((x, i) => (
-          <mesh key={i} position={[x, -0.15, 0.42]}>
-            <boxGeometry args={[0.02, 0.06, 0.01]} />
-            <meshStandardMaterial color={bodyColor} />
-          </mesh>
-        ))}
-
-        {/* Robot Antennas */}
-        <group ref={antennaRef}>
-          <mesh position={[-0.3, 0.4, 0]}>
-            <cylinderGeometry args={[0.02, 0.02, 0.3, 8]} />
-            <meshStandardMaterial color={metalColor} metalness={0.9} roughness={0.1} />
-          </mesh>
-          <mesh position={[-0.3, 0.65, 0]}>
-            <sphereGeometry args={[0.05, 8, 8]} />
-            <meshStandardMaterial color={bodyColor} emissive={bodyColor} emissiveIntensity={0.2} />
+          <mesh position={[0.12, 0.05, 0.32]}>
+            <sphereGeometry args={[0.04, 8, 8]} />
+            <meshStandardMaterial color="#ffffff" />
           </mesh>
           
-          <mesh position={[0.3, 0.4, 0]}>
-            <cylinderGeometry args={[0.02, 0.02, 0.3, 8]} />
-            <meshStandardMaterial color={metalColor} metalness={0.9} roughness={0.1} />
+          {/* Pupils */}
+          <mesh position={[-0.12, 0.05, 0.35]}>
+            <sphereGeometry args={[0.02, 8, 8]} />
+            <meshStandardMaterial color={eyeColor} />
           </mesh>
-          <mesh position={[0.3, 0.65, 0]}>
-            <sphereGeometry args={[0.05, 8, 8]} />
-            <meshStandardMaterial color={bodyColor} emissive={bodyColor} emissiveIntensity={0.2} />
+          <mesh position={[0.12, 0.05, 0.35]}>
+            <sphereGeometry args={[0.02, 8, 8]} />
+            <meshStandardMaterial color={eyeColor} />
           </mesh>
         </group>
+
+        {/* Nose */}
+        <mesh position={[0, 0, 0.34]}>
+          <coneGeometry args={[0.03, 0.08, 6]} />
+          <meshStandardMaterial color={skinColor} roughness={0.8} />
+        </mesh>
+
+        {/* Mouth */}
+        <group ref={mouthRef}>
+          <mesh position={[0, -0.08, 0.33]} rotation={[Math.PI / 2, 0, 0]}>
+            <torusGeometry args={[0.06, 0.01, 4, 16]} />
+            <meshStandardMaterial color="#8b4513" roughness={0.6} />
+          </mesh>
+        </group>
+
+        {/* Ears */}
+        <mesh position={[-0.32, 0, 0.1]}>
+          <sphereGeometry args={[0.06, 8, 8]} />
+          <meshStandardMaterial color={skinColor} roughness={0.8} />
+        </mesh>
+        <mesh position={[0.32, 0, 0.1]}>
+          <sphereGeometry args={[0.06, 8, 8]} />
+          <meshStandardMaterial color={skinColor} roughness={0.8} />
+        </mesh>
       </group>
 
-      {/* Robot Body - cylindrical with panels */}
+      {/* Neck */}
+      <mesh position={[0, 1.05, 0]}>
+        <cylinderGeometry args={[0.08, 0.1, 0.15, 12]} />
+        <meshStandardMaterial color={skinColor} roughness={0.8} />
+      </mesh>
+
+      {/* Torso - wearing a shirt */}
       <mesh position={[0, 0.5, 0]}>
-        <cylinderGeometry args={[0.4, 0.5, 1, 8]} />
-        <meshStandardMaterial color={metalColor} metalness={0.7} roughness={0.3} />
+        <cylinderGeometry args={[0.25, 0.3, 0.8, 12]} />
+        <meshStandardMaterial color={clothingColor} roughness={0.7} metalness={0.1} />
       </mesh>
 
-      {/* Chest Panel */}
-      <mesh position={[0, 0.6, 0.41]}>
-        <boxGeometry args={[0.6, 0.6, 0.05]} />
-        <meshStandardMaterial color={bodyColor} metalness={0.5} roughness={0.4} />
-      </mesh>
-
-      {/* Left Arm (robotic segments) */}
-      <group ref={leftArmRef} position={[-0.6, 0.8, 0]}>
+      {/* Left Arm */}
+      <group ref={leftArmRef} position={[-0.4, 0.7, 0]} rotation={[0, 0, 0.2]}>
         {/* Upper arm */}
-        <mesh position={[0, 0.1, 0]}>
-          <cylinderGeometry args={[0.1, 0.12, 0.4, 8]} />
-          <meshStandardMaterial color={metalColor} metalness={0.8} roughness={0.2} />
+        <mesh position={[0, 0, 0]}>
+          <cylinderGeometry args={[0.06, 0.08, 0.3, 8]} />
+          <meshStandardMaterial color={clothingColor} roughness={0.7} />
         </mesh>
-        {/* Elbow joint */}
-        <mesh position={[0, -0.1, 0]}>
-          <sphereGeometry args={[0.12, 8, 8]} />
-          <meshStandardMaterial color={bodyColor} metalness={0.6} roughness={0.3} />
+        {/* Forearm */}
+        <mesh position={[0, -0.25, 0]}>
+          <cylinderGeometry args={[0.05, 0.06, 0.25, 8]} />
+          <meshStandardMaterial color={skinColor} roughness={0.8} />
         </mesh>
-        {/* Lower arm */}
-        <mesh position={[0, -0.3, 0]}>
-          <cylinderGeometry args={[0.08, 0.1, 0.4, 8]} />
-          <meshStandardMaterial color={metalColor} metalness={0.8} roughness={0.2} />
-        </mesh>
-        {/* Robot Hand - more mechanical */}
-        <mesh position={[0, -0.5, 0]}>
-          <boxGeometry args={[0.15, 0.15, 0.08]} />
-          <meshStandardMaterial color={bodyColor} metalness={0.6} roughness={0.4} />
-        </mesh>
-      </group>
-
-      {/* Right Arm (robotic segments) */}
-      <group ref={rightArmRef} position={[0.6, 0.8, 0]} rotation={[0, 0, -0.3]}>
-        {/* Upper arm */}
-        <mesh position={[0, 0.1, 0]}>
-          <cylinderGeometry args={[0.1, 0.12, 0.4, 8]} />
-          <meshStandardMaterial color={metalColor} metalness={0.8} roughness={0.2} />
-        </mesh>
-        {/* Elbow joint */}
-        <mesh position={[0, -0.1, 0]}>
-          <sphereGeometry args={[0.12, 8, 8]} />
-          <meshStandardMaterial color={bodyColor} metalness={0.6} roughness={0.3} />
-        </mesh>
-        {/* Lower arm */}
-        <mesh position={[0, -0.3, 0]}>
-          <cylinderGeometry args={[0.08, 0.1, 0.4, 8]} />
-          <meshStandardMaterial color={metalColor} metalness={0.8} roughness={0.2} />
-        </mesh>
-        {/* Robot Hand - more mechanical */}
-        <mesh position={[0, -0.5, 0]}>
-          <boxGeometry args={[0.15, 0.15, 0.08]} />
-          <meshStandardMaterial color={bodyColor} metalness={0.6} roughness={0.4} />
-        </mesh>
-      </group>
-
-      {/* Robot Legs - more mechanical */}
-      <group position={[-0.2, -0.3, 0]}>
-        <mesh>
-          <cylinderGeometry args={[0.1, 0.12, 0.6, 8]} />
-          <meshStandardMaterial color={metalColor} metalness={0.8} roughness={0.2} />
-        </mesh>
-        {/* Knee joint */}
+        {/* Hand */}
         <mesh position={[0, -0.4, 0]}>
-          <sphereGeometry args={[0.1, 8, 8]} />
-          <meshStandardMaterial color={bodyColor} metalness={0.6} roughness={0.3} />
+          <sphereGeometry args={[0.06, 8, 8]} />
+          <meshStandardMaterial color={skinColor} roughness={0.8} />
         </mesh>
-        {/* Robot Foot */}
-        <mesh position={[0, -0.7, 0.1]}>
-          <boxGeometry args={[0.2, 0.1, 0.3]} />
-          <meshStandardMaterial color={bodyColor} metalness={0.6} roughness={0.4} />
+      </group>
+
+      {/* Right Arm */}
+      <group ref={rightArmRef} position={[0.4, 0.7, 0]} rotation={[0, 0, -0.2]}>
+        {/* Upper arm */}
+        <mesh position={[0, 0, 0]}>
+          <cylinderGeometry args={[0.06, 0.08, 0.3, 8]} />
+          <meshStandardMaterial color={clothingColor} roughness={0.7} />
+        </mesh>
+        {/* Forearm */}
+        <mesh position={[0, -0.25, 0]}>
+          <cylinderGeometry args={[0.05, 0.06, 0.25, 8]} />
+          <meshStandardMaterial color={skinColor} roughness={0.8} />
+        </mesh>
+        {/* Hand */}
+        <mesh position={[0, -0.4, 0]}>
+          <sphereGeometry args={[0.06, 8, 8]} />
+          <meshStandardMaterial color={skinColor} roughness={0.8} />
+        </mesh>
+      </group>
+
+      {/* Legs with pants */}
+      <group position={[-0.15, -0.2, 0]}>
+        <mesh>
+          <cylinderGeometry args={[0.08, 0.1, 0.6, 8]} />
+          <meshStandardMaterial color="#2d3748" roughness={0.8} />
+        </mesh>
+        {/* Foot */}
+        <mesh position={[0, -0.4, 0.08]}>
+          <boxGeometry args={[0.12, 0.06, 0.2]} />
+          <meshStandardMaterial color="#1a202c" roughness={0.6} />
         </mesh>
       </group>
       
-      <group position={[0.2, -0.3, 0]}>
+      <group position={[0.15, -0.2, 0]}>
         <mesh>
-          <cylinderGeometry args={[0.1, 0.12, 0.6, 8]} />
-          <meshStandardMaterial color={metalColor} metalness={0.8} roughness={0.2} />
+          <cylinderGeometry args={[0.08, 0.1, 0.6, 8]} />
+          <meshStandardMaterial color="#2d3748" roughness={0.8} />
         </mesh>
-        {/* Knee joint */}
-        <mesh position={[0, -0.4, 0]}>
-          <sphereGeometry args={[0.1, 8, 8]} />
-          <meshStandardMaterial color={bodyColor} metalness={0.6} roughness={0.3} />
-        </mesh>
-        {/* Robot Foot */}
-        <mesh position={[0, -0.7, 0.1]}>
-          <boxGeometry args={[0.2, 0.1, 0.3]} />
-          <meshStandardMaterial color={bodyColor} metalness={0.6} roughness={0.4} />
+        {/* Foot */}
+        <mesh position={[0, -0.4, 0.08]}>
+          <boxGeometry args={[0.12, 0.06, 0.2]} />
+          <meshStandardMaterial color="#1a202c" roughness={0.6} />
         </mesh>
       </group>
 
-      {/* Letter A on chest - now more robotic */}
-      <Center position={[0, 0.6, 0.46]}>
+      {/* Letter A badge on shirt */}
+      <Center position={[0, 0.6, 0.26]}>
         <Text3D
           font="/fonts/helvetiker_regular.typeface.json"
-          size={0.2}
-          height={0.02}
+          size={0.08}
+          height={0.01}
         >
           A
-          <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={0.1} />
+          <meshStandardMaterial color="#ffffff" />
         </Text3D>
       </Center>
 
-      {/* Processing bubble when thinking */}
+      {/* Thought bubble when thinking */}
       {isThinking && (
-        <group position={[0.8, 2.2, 0]}>
+        <group position={[0.6, 1.8, 0]}>
           <mesh>
-            <boxGeometry args={[0.3, 0.15, 0.05]} />
-            <meshStandardMaterial color="#000000" />
+            <sphereGeometry args={[0.15, 16, 16]} />
+            <meshStandardMaterial color="#f7fafc" opacity={0.9} transparent />
           </mesh>
-          <mesh position={[0, 0, 0.03]}>
-            <boxGeometry args={[0.25, 0.1, 0.01]} />
-            <meshStandardMaterial color={bodyColor} emissive={bodyColor} emissiveIntensity={0.3} />
+          <mesh position={[-0.1, -0.1, 0]}>
+            <sphereGeometry args={[0.05, 8, 8]} />
+            <meshStandardMaterial color="#f7fafc" opacity={0.7} transparent />
           </mesh>
-          {/* Processing dots */}
-          <group ref={processingDotsRef}>
-            {[-0.08, 0, 0.08].map((x, i) => (
-              <mesh key={i} position={[x, 0, 0.04]}>
-                <sphereGeometry args={[0.02, 8, 8]} />
-                <meshStandardMaterial color={bodyColor} emissive={bodyColor} emissiveIntensity={0.5} />
-              </mesh>
-            ))}
-          </group>
+          <mesh position={[-0.15, -0.2, 0]}>
+            <sphereGeometry args={[0.03, 8, 8]} />
+            <meshStandardMaterial color="#f7fafc" opacity={0.5} transparent />
+          </mesh>
+          {/* Thinking dots */}
+          {[-0.03, 0, 0.03].map((x, i) => (
+            <mesh key={i} position={[x, 0, 0]}>
+              <sphereGeometry args={[0.01, 8, 8]} />
+              <meshStandardMaterial color="#4a5568" />
+            </mesh>
+          ))}
         </group>
       )}
 
-      {/* Digital sound waves when speaking */}
+      {/* Sound waves when speaking */}
       {isSpeaking && (
-        <group position={[0, 1.8, 0.6]}>
-          {[0.3, 0.5, 0.7].map((radius, i) => (
-            <mesh key={i} rotation={[0, 0, 0]} scale={[1 + i * 0.3, 1 + i * 0.3, 1]}>
-              <ringGeometry args={[radius, radius + 0.02, 8]} />
+        <group position={[0, 1.6, 0.4]}>
+          {[0.2, 0.3, 0.4].map((radius, i) => (
+            <mesh key={i} rotation={[0, 0, 0]} scale={[1 + i * 0.2, 1 + i * 0.2, 1]}>
+              <ringGeometry args={[radius, radius + 0.015, 12]} />
               <meshStandardMaterial 
-                color={bodyColor} 
-                emissive={bodyColor} 
-                emissiveIntensity={0.4 - i * 0.1} 
+                color="#3182ce" 
                 transparent 
-                opacity={0.8 - i * 0.2} 
+                opacity={0.6 - i * 0.15} 
               />
             </mesh>
           ))}
@@ -316,13 +300,13 @@ const Avatar3D = ({
 }: Avatar3DProps) => {
   return (
     <div className="w-48 h-48 mx-auto">
-      <Canvas camera={{ position: [0, 0, 4], fov: 50 }}>
-        <ambientLight intensity={0.4} />
+      <Canvas camera={{ position: [0, 0, 3], fov: 50 }}>
+        <ambientLight intensity={0.6} />
         <directionalLight position={[5, 5, 5]} intensity={0.8} castShadow />
-        <pointLight position={[-5, 5, 5]} intensity={0.6} color="#4ade80" />
-        <pointLight position={[5, -5, 5]} intensity={0.4} color="#60a5fa" />
+        <pointLight position={[-3, 3, 3]} intensity={0.4} color="#ffeaa7" />
+        <pointLight position={[3, -3, 3]} intensity={0.3} color="#74b9ff" />
         
-        <RobotMesh 
+        <HumanMesh 
           isWaving={isWaving} 
           userMood={userMood}
           isThinking={isThinking}
