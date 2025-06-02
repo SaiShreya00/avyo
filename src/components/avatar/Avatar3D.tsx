@@ -25,7 +25,9 @@ const HumanMesh = ({
   const headRef = useRef<THREE.Group>(null);
   const eyesRef = useRef<THREE.Group>(null);
   const mouthRef = useRef<THREE.Group>(null);
-  const [blinkPhase, setBlinkPhase] = useState(0);
+  const torsoRef = useRef<THREE.Group>(null);
+  const [blinkTimer, setBlinkTimer] = useState(0);
+  const [nextBlinkTime, setNextBlinkTime] = useState(3);
   
   // Get mood-based colors and expressions
   const getMoodExpression = (mood: string) => {
@@ -39,60 +41,117 @@ const HumanMesh = ({
 
   const expression = getMoodExpression(userMood);
   const skinColor = expression.skinTone;
-  const hairColor = "#8b4513"; // Brown hair
-  const eyeColor = "#4a5568"; // Dark gray eyes
-  const clothingColor = "#3182ce"; // Blue shirt
+  const hairColor = "#8b4513";
+  const eyeColor = "#4a5568";
+  const clothingColor = "#3182ce";
 
   useFrame((state) => {
+    const time = state.clock.elapsedTime;
+    
     if (meshRef.current) {
-      // Gentle breathing animation
-      meshRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.8) * 0.02;
+      // Realistic breathing animation - chest rises and falls
+      const breathingIntensity = 0.015;
+      const breathingSpeed = 0.6;
+      meshRef.current.position.y = Math.sin(time * breathingSpeed) * breathingIntensity;
       
-      if (!isThinking && !isListening) {
-        // Subtle idle movement
-        meshRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.3) * 0.02;
-      }
+      // Subtle weight shifting - realistic idle movement
+      const shiftSpeed = 0.2;
+      const shiftIntensity = 0.008;
+      meshRef.current.position.x = Math.sin(time * shiftSpeed) * shiftIntensity;
+      meshRef.current.rotation.z = Math.sin(time * shiftSpeed * 0.7) * 0.01;
     }
     
-    // Head animations
+    // Torso breathing expansion
+    if (torsoRef.current) {
+      const breathScale = 1 + Math.sin(time * 0.6) * 0.02;
+      torsoRef.current.scale.x = breathScale;
+      torsoRef.current.scale.z = breathScale;
+    }
+    
+    // Natural head movements
     if (headRef.current) {
       if (isThinking) {
-        // Thinking: slight head tilt and occasional nods
-        headRef.current.rotation.z = Math.sin(state.clock.elapsedTime * 0.5) * 0.08;
-        headRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.3) * 0.05;
+        // Thinking: contemplative head tilt and slow nods
+        headRef.current.rotation.z = Math.sin(time * 0.4) * 0.12;
+        headRef.current.rotation.x = Math.sin(time * 0.25) * 0.08;
+        headRef.current.position.y = 1.4 + Math.sin(time * 0.3) * 0.01;
       } else if (isListening) {
-        // Listening: attentive forward lean
-        headRef.current.rotation.x = -0.05 + Math.sin(state.clock.elapsedTime * 1.5) * 0.03;
+        // Listening: attentive forward lean with micro-movements
+        headRef.current.rotation.x = -0.08 + Math.sin(time * 1.8) * 0.02;
+        headRef.current.rotation.y = Math.sin(time * 0.7) * 0.02;
       } else if (isSpeaking) {
-        // Speaking: natural head movement
-        headRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 2) * 0.03;
-        headRef.current.position.y = Math.sin(state.clock.elapsedTime * 4) * 0.01;
+        // Speaking: natural head gestures
+        headRef.current.rotation.y = Math.sin(time * 1.5) * 0.04;
+        headRef.current.rotation.x = Math.sin(time * 2.2) * 0.02;
+        headRef.current.position.y = 1.4 + Math.sin(time * 3) * 0.008;
+      } else {
+        // Idle: subtle natural movement
+        headRef.current.rotation.y = Math.sin(time * 0.3) * 0.03;
+        headRef.current.rotation.x = Math.sin(time * 0.4) * 0.015;
+        headRef.current.rotation.z = Math.sin(time * 0.25) * 0.01;
+        headRef.current.position.y = 1.4 + Math.sin(time * 0.6) * 0.005;
       }
     }
     
-    // Waving animation
-    if (leftArmRef.current && isWaving) {
-      leftArmRef.current.rotation.z = Math.sin(state.clock.elapsedTime * 3) * 0.4 + 0.6;
-      leftArmRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 3) * 0.1;
+    // Arm movements
+    if (leftArmRef.current) {
+      if (isWaving) {
+        // Energetic waving
+        leftArmRef.current.rotation.z = Math.sin(time * 4) * 0.5 + 0.8;
+        leftArmRef.current.rotation.x = Math.sin(time * 4) * 0.15;
+      } else {
+        // Natural arm sway
+        leftArmRef.current.rotation.z = 0.2 + Math.sin(time * 0.4) * 0.05;
+        leftArmRef.current.rotation.x = Math.sin(time * 0.3) * 0.03;
+      }
     }
     
-    // Thinking gesture - hand to chin
-    if (rightArmRef.current && isThinking) {
-      rightArmRef.current.rotation.z = -0.6;
-      rightArmRef.current.rotation.x = 0.2;
+    if (rightArmRef.current) {
+      if (isThinking) {
+        // Hand to chin thinking pose
+        rightArmRef.current.rotation.z = -0.7 + Math.sin(time * 0.5) * 0.1;
+        rightArmRef.current.rotation.x = 0.3 + Math.sin(time * 0.4) * 0.05;
+      } else {
+        // Natural arm sway (opposite to left arm)
+        rightArmRef.current.rotation.z = -0.2 + Math.sin(time * 0.4 + Math.PI) * 0.05;
+        rightArmRef.current.rotation.x = Math.sin(time * 0.3 + Math.PI) * 0.03;
+      }
     }
     
-    // Natural blinking animation
+    // Realistic blinking
     if (eyesRef.current) {
-      const blinkTime = state.clock.elapsedTime * 0.8;
-      const shouldBlink = Math.sin(blinkTime) > 0.95;
-      eyesRef.current.scale.y = shouldBlink ? 0.1 : expression.eyeScale;
+      // Update blink timer
+      const deltaTime = 1/60; // Approximate frame time
+      setBlinkTimer(prev => prev + deltaTime);
+      
+      if (blinkTimer >= nextBlinkTime) {
+        // Trigger blink
+        const blinkPhase = (blinkTimer - nextBlinkTime) * 15; // Blink speed
+        if (blinkPhase < 1) {
+          // Closing phase
+          eyesRef.current.scale.y = Math.max(0.1, 1 - blinkPhase);
+        } else if (blinkPhase < 2) {
+          // Opening phase
+          eyesRef.current.scale.y = Math.min(expression.eyeScale, blinkPhase - 1);
+        } else {
+          // Blink complete, reset timer
+          eyesRef.current.scale.y = expression.eyeScale;
+          setBlinkTimer(0);
+          setNextBlinkTime(2 + Math.random() * 4); // Random interval between blinks
+        }
+      } else {
+        eyesRef.current.scale.y = expression.eyeScale;
+      }
     }
 
     // Mouth animation for speaking
     if (mouthRef.current && isSpeaking) {
-      const talkAnim = Math.sin(state.clock.elapsedTime * 8) * 0.05;
-      mouthRef.current.scale.y = 1 + talkAnim;
+      const talkAnim = Math.sin(time * 8) * 0.08 + Math.sin(time * 12) * 0.04;
+      mouthRef.current.scale.y = 1 + Math.abs(talkAnim);
+      mouthRef.current.position.y = -0.08 + talkAnim * 0.01;
+    } else if (mouthRef.current) {
+      // Subtle mouth movements for breathing
+      mouthRef.current.scale.y = 1 + Math.sin(time * 0.6) * 0.005;
     }
   });
 
@@ -167,10 +226,12 @@ const HumanMesh = ({
       </mesh>
 
       {/* Torso - wearing a shirt */}
-      <mesh position={[0, 0.5, 0]}>
-        <cylinderGeometry args={[0.25, 0.3, 0.8, 12]} />
-        <meshStandardMaterial color={clothingColor} roughness={0.7} metalness={0.1} />
-      </mesh>
+      <group ref={torsoRef}>
+        <mesh position={[0, 0.5, 0]}>
+          <cylinderGeometry args={[0.25, 0.3, 0.8, 12]} />
+          <meshStandardMaterial color={clothingColor} roughness={0.7} metalness={0.1} />
+        </mesh>
+      </group>
 
       {/* Left Arm */}
       <group ref={leftArmRef} position={[-0.4, 0.7, 0]} rotation={[0, 0, 0.2]}>
@@ -237,14 +298,10 @@ const HumanMesh = ({
 
       {/* Letter A badge on shirt */}
       <Center position={[0, 0.6, 0.26]}>
-        <Text3D
-          font="/fonts/helvetiker_regular.typeface.json"
-          size={0.08}
-          height={0.01}
-        >
-          A
+        <mesh>
+          <planeGeometry args={[0.12, 0.12]} />
           <meshStandardMaterial color="#ffffff" />
-        </Text3D>
+        </mesh>
       </Center>
 
       {/* Thought bubble when thinking */}
